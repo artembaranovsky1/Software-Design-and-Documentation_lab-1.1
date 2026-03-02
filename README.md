@@ -2,77 +2,53 @@
 
 
 ```mermaid
-graph LR
-    %% Клієнти
-    Sender[Клієнт-Відправник]
-    Receiver[Клієнт-Отримувач]
-
-    %% Основні компоненти
-    API[Backend API]
-    MS[Message Service]
-    SS[Status Service]
-    DB[(Messages DB)]
-    Queue[Message Queue]
-
-    %% Шлях повідомлення
-    Sender --> API
-    API --> MS
-    MS --> DB
-    MS --> Queue
-    Queue --> Receiver
-
-    %% Шлях статусів (ACKs)
-    Receiver -- "ACK (delivered/read)" --> SS
-    SS --> DB
-    SS -- "Notify status" --> Sender
+graph TD
+  Client[Client: Web/Mobile] -- "1. Send/Update Status" --> API[Backend API]
+  API -- "2. Route Request" --> MsgService[Message Service]
+  MsgService -- "3. Persist State" --> DB[(Messages DB)]
+  MsgService -- "4. Notify Recipient" --> WS[WebSocket / Push Service]
+  WS -- "5. Deliver Status Update" --> Client
+  MsgService -- "Optional" --> Queue[Message Queue]
 ```
 
 ```mermaid
 sequenceDiagram
     participant A as User A (Sender)
     participant API as Backend API
-    participant MS as Message Service
+    participant Msg as Message Service
     participant DB as Database
-    participant DS as Delivery Service
     participant B as User B (Recipient)
 
     A->>API: POST /messages (content)
-    API->>MS: processMessage()
-    MS->>DB: save(status: "sent")
-    MS->>DS: triggerDelivery()
-    API-->>A: 202 Accepted (status: sent)
+    API->>Msg: createMessage()
+    Msg->>DB: save (status: SENT)
+    API-->>A: 202 Accepted (status: SENT)
 
-    DS->>B: Deliver via WebSocket
-    B-->>API: POST /messages/{id}/ack (delivered)
-    API->>MS: updateStatus(delivered)
-    MS->>DB: update(status: "delivered")
-    MS-->>A: Notify: Status Delivered (SignalR/WS)
+    Note over Msg, B: Delivery Process
+    Msg->>B: Push/WebSocket Delivery
+    B->>API: POST /messages/{id}/ack (type: DELIVERED)
+    API->>Msg: updateStatus(DELIVERED)
+    Msg->>DB: update(status: DELIVERED)
+    Msg-->>A: WS Notify: Message Delivered
 
-    B->>B: User opens chat
-    B-->>API: POST /messages/{id}/ack (read)
-    API->>MS: updateStatus(read)
-    MS->>DB: update(status: "read")
-    MS-->>A: Notify: Status Read
+    B->>API: POST /messages/{id}/ack (type: READ)
+    API->>Msg: updateStatus(READ)
+    Msg->>DB: update(status: READ)
+    Msg-->>A: WS Notify: Message Read
 ```
 
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Sent: Message saved in DB
-    Sent --> Delivered: Client B acknowledges receipt
-    Delivered --> Read: Client B opens message
-    
-    Sent --> Failed: Network timeout / No ACK
+    [*] --> Sent: User sends message
+    Sent --> Delivered: Recipient client ACKs receipt
+    Delivered --> Read: Recipient opens chat
+    Sent --> Failed: Network error / Timeout
     Failed --> Sent: Retry logic
     
     note right of Delivered
-        Client sends ACK (delivered) 
-        when app receives payload
-    end note
-
-    note right of Read
-        Client sends ACK (read) 
-        when message enters viewport
+        Client-side acknowledgment 
+        is required here.
     end note
 ```
 
