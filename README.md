@@ -2,13 +2,27 @@
 
 
 ```mermaid
-graph TD
-  Client[Client: Web/Mobile] -- "1. Send/Update Status" --> API[Backend API]
-  API -- "2. Route Request" --> MsgService[Message Service]
-  MsgService -- "3. Persist State" --> DB[(Messages DB)]
-  MsgService -- "4. Notify Recipient" --> WS[WebSocket / Push Service]
-  WS -- "5. Deliver Status Update" --> Client
-  MsgService -- "Optional" --> Queue[Message Queue]
+graph LR
+  subgraph "Users"
+    CA[Client A: Sender]
+    CB[Client B: Recipient]
+  end
+
+  subgraph "Backend System"
+    API[Backend API]
+    MS[Message Service]
+    DB[(Messages DB)]
+    WS[WebSocket / Push Service]
+  end
+
+  CA -- "Sends Message" --> API
+  API --> MS
+  MS --> DB
+  MS -- "Notifies Recipient" --> WS
+  WS -- "Delivers Message" --> CB
+  CB -- "Sends ACKs (Delivered/Read)" --> API
+  MS -- "Notifies Sender about Status Update" --> WS
+  WS -- "Updates Status UI" --> CA
 ```
 
 ```mermaid
