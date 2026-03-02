@@ -2,27 +2,14 @@
 
 
 ```mermaid
-graph LR
-  subgraph "Users"
-    CA[Client A: Sender]
-    CB[Client B: Recipient]
-  end
-
-  subgraph "Backend System"
-    API[Backend API]
-    MS[Message Service]
-    DB[(Messages DB)]
-    WS[WebSocket / Push Service]
-  end
-
-  CA -- "Sends Message" --> API
-  API --> MS
-  MS --> DB
-  MS -- "Notifies Recipient" --> WS
-  WS -- "Delivers Message" --> CB
-  CB -- "Sends ACKs (Delivered/Read)" --> API
-  MS -- "Notifies Sender about Status Update" --> WS
-  WS -- "Updates Status UI" --> CA
+graph TD
+    Client[Web / Mobile Client] --> API[Backend API]
+    API --> MS[Message Service]
+    MS --> DB[(Messages DB)]
+    MS --> Queue[Message Queue]
+    Queue --> DS[Delivery Service]
+    DS --> WS[WebSocket / Push Service]
+    WS <--> Client
 ```
 
 ```mermaid
