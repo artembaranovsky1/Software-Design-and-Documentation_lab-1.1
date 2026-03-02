@@ -2,43 +2,86 @@
 
 
 ```mermaid
-graph LR
-    Client -- POST --> API[Backend API]
-    API -- 2. Process --> MS[Message Service]
-    MS -- 3. Store --> DB[(Messages DB)]
-    MS -- 5. Push --> Queue[Message Queue]
-    Queue -- 6. Trigger --> DS[Delivery Service]
-    DS -- 7. Notify Status --> Client
-    DS -- 8. Update State --> MS
+graph TD
+    Client[Client Web/Mobile] --> API[Backend API]
+    API --> MS[Message Service]
+    MS --> DB[(Messages DB)]
+    MS --> Broker[Message Broker / Queue]
+    Broker --> DS[Delivery Service]
+    DS --> WS[WebSocket / Push Provider]
+    WS -- Status Update / ACK --> Client
+    Client -- ACK --> API
 ```
 
 ```mermaid
 sequenceDiagram
-  participant A as User A
-  participant ClientA as Client A
-  participant API
-  participant Msg as Message Service
-  participant DB
-  participant Queue
-  participant ClientB as Client B
+    participant A as User A (Sender)
+    participant API as Backend API
+    participant MS as Message Service
+    participant DB as Database
+    participant DS as Delivery Service
+    participant B as User B (Recipient)
 
-  A->>ClientA: Send message
-  ClientA->>API: POST /messages
-  API->>Msg: createMessage()
-  Msg->>DB: save(message, status="sent")
-  Msg->>Queue: enqueue delivery
-  API-->>ClientA: 202 Accepted
+    A->>API: POST /messages (content)
+    API->>MS: processMessage()
+    MS->>DB: save(status: "sent")
+    MS->>DS: triggerDelivery()
+    API-->>A: 202 Accepted (status: sent)
 
-  Queue->>ClientB: push message
-  ClientB->>API: POST /messages/{id}/delivered
-  API->>Msg: markDelivered(id)
-  Msg->>DB: update status="delivered"
-  API-->>ClientB: 200 OK
-  Msg-->>ClientA: notifyDelivered(id)
+    DS->>B: Deliver via WebSocket
+    B-->>API: POST /messages/{id}/ack (delivered)
+    API->>MS: updateStatus(delivered)
+    MS->>DB: update(status: "delivered")
+    MS-->>A: Notify: Status Delivered (SignalR/WS)
 
-  ClientB->>API: POST /messages/{id}/read
-  API->>Msg: markRead(id)
-  Msg->>DB: update status="read"
-  API-->>ClientB: 200 OK
-  Msg-->>ClientA: notifyRead(id)
+    B->>B: User opens chat
+    B-->>API: POST /messages/{id}/ack (read)
+    API->>MS: updateStatus(read)
+    MS->>DB: update(status: "read")
+    MS-->>A: Notify: Status Read
+```
+
+
+```mermaid
+stateDiagram-v2
+    [*] --> Sent: Message saved in DB
+    Sent --> Delivered: Client B acknowledges receipt
+    Delivered --> Read: Client B opens message
+    
+    Sent --> Failed: Network timeout / No ACK
+    Failed --> Sent: Retry logic
+    
+    note right of Delivered
+        Client sends ACK (delivered) 
+        when app receives payload
+    end note
+
+    note right of Read
+        Client sends ACK (read) 
+        when message enters viewport
+    end note
+```
+
+
+```mermaid
+Status
+Accepted
+
+Context
+Нам потрібно гарантувати точне відображення статусів повідомлень. Сервер може знати, що він відправив повідомлення, але тільки клієнт може підтвердити, що воно було отримане (delivered) або прочитане (read).
+
+Decision
+Who updates status: Клієнтська програма ініціює оновлення, надсилаючи короткі повідомлення-підтвердження (ACK) через API або WebSocket.
+
+Missing Acknowledgements: Якщо сервер не отримує delivered протягом певного часу, повідомлення вважається "в черзі". При наступному підключенні клієнта (B), система проводить синхронізацію і повторно надсилає відсутні ACKs.
+
+Alternatives
+Server-only tracking: Сервер ставить статус delivered одразу після відправки в сокет. (Відхилено: не гарантує, що додаток на телефоні реально отримав дані).
+
+Polling: Клієнт постійно запитує, чи є нові статуси. (Відхилено: надто велике навантаження на батарею та мережу).
+
+Consequences
++ Висока точність статусів (як у Telegram/WhatsApp).
+
+- Збільшення кількості дрібних запитів до API (необхідна оптимізація через batching підтверджень).
 ```
