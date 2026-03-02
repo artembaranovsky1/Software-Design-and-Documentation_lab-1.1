@@ -12,7 +12,7 @@ graph LR
     DS -- 8. Update State --> MS
 ```
 
-
+```mermaid
 sequenceDiagram
   participant A as User A
   participant ClientA as Client A
@@ -41,3 +41,4 @@ sequenceDiagram
   Msg->>DB: update status="read"
   API-->>ClientB: 200 OK
   Msg-->>ClientA: notifyRead(id)
+```
