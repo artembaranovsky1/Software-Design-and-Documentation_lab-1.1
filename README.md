@@ -2,15 +2,48 @@
 
 
 ```mermaid
-graph TD
-    Client[Client Web/Mobile] --> API[Backend API]
-    API --> MS[Message Service]
-    MS --> DB[(Messages DB)]
-    MS --> Broker[Message Broker / Queue]
-    Broker --> DS[Delivery Service]
-    DS --> WS[WebSocket / Push Provider]
-    WS -- Status Update / ACK --> Client
-    Client -- ACK --> API
+graph LR
+    %% Клієнтська сторона
+    C1[Клієнт-Відправник]
+    C2[Клієнт-Отримувач]
+
+    %% Точка входу та сервіси
+    API[API Gateway]
+    Auth[Auth Service]
+    MS[Message Service]
+    SS[Status Service]
+
+    %% Черга та надійна доставка
+    MQ[Message Queue]
+    DS[Delivery Service]
+    WS[WebSocket / Push Service]
+
+    %% Зберігання даних
+    DB[(Messages DB)]
+
+    %% Основний потік: відправлення
+    C1 -- "POST /messages" --> API
+    API -- "Validate" --> Auth
+    API -- "Create" --> MS
+    MS -- "Save" --> DB
+    MS -- "Set status 'sent'" --> SS
+    MS -- "Publish" --> MQ
+    MQ -- "Consume" --> DS
+    DS -- "Push via WS" --> WS
+    WS -- "Deliver" --> C2
+
+    %% Потік підтверджень: статуси
+    C2 -- "ACK delivered" --> WS
+    WS -- "Deliver ACK" --> SS
+    C2 -- "ACK read" --> WS
+    
+    %% Оновлення та сповіщення про статус
+    SS -- "Update" --> DB
+    SS -- "Notify sender" --> WS
+    WS -- "Status update" --> C1
+
+    %% Стилізація для виділення Status Service (центр твого завдання)
+    style SS fill:#e1f5fe,stroke:#01579b,stroke-width:2px
 ```
 
 ```mermaid
