@@ -14,43 +14,36 @@ graph TD
 
 ```mermaid
 sequenceDiagram
-    participant A as User A (Sender)
+    participant UA as User A (Sender)
+    participant C as Client A
     participant API as Backend API
-    participant Msg as Message Service
-    participant DB as Database
-    participant B as User B (Recipient)
+    participant MS as Message Service
+    participant Q as Message Queue
+    participant DS as Delivery Service
+    participant CB as Client B (Recipient)
 
-    A->>API: POST /messages (content)
-    API->>Msg: createMessage()
-    Msg->>DB: save (status: SENT)
-    API-->>A: 202 Accepted (status: SENT)
-
-    Note over Msg, B: Delivery Process
-    Msg->>B: Push/WebSocket Delivery
-    B->>API: POST /messages/{id}/ack (type: DELIVERED)
-    API->>Msg: updateStatus(DELIVERED)
-    Msg->>DB: update(status: DELIVERED)
-    Msg-->>A: WS Notify: Message Delivered
-
-    B->>API: POST /messages/{id}/ack (type: READ)
-    API->>Msg: updateStatus(READ)
-    Msg->>DB: update(status: READ)
-    Msg-->>A: WS Notify: Message Read
+    UA->>C: Write message
+    C->>API: POST /send (status: pending)
+    API->>MS: processMessage()
+    MS->>Q: enqueue delivery task
+    API-->>C: 202 Accepted (status: sent)
+    
+    Q->>DS: trigger delivery
+    DS->>CB: push message via WebSocket
+    CB-->>DS: ACK (received)
+    DS->>MS: updateStatus(delivered)
+    MS-->>C: WebSocket: Notify "Delivered"
 ```
 
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Sent: User sends message
-    Sent --> Delivered: Recipient client ACKs receipt
-    Delivered --> Read: Recipient opens chat
-    Sent --> Failed: Network error / Timeout
+    [*] --> Sent: Client sends message
+    Sent --> Delivered: Recipient's device ACKs receipt
+    Sent --> Failed: Network timeout / Error
     Failed --> Sent: Retry logic
-    
-    note right of Delivered
-        Client-side acknowledgment 
-        is required here.
-    end note
+    Delivered --> Read: Recipient opens chat/message
+    Read --> [*]
 ```
 
 
