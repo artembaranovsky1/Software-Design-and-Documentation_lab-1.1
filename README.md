@@ -63,7 +63,6 @@ stateDiagram-v2
 ```
 
 
-```mermaid
 Status
 Accepted
 
@@ -84,4 +83,3 @@ Consequences
 + Висока точність статусів (як у Telegram/WhatsApp).
 
 - Збільшення кількості дрібних запитів до API (необхідна оптимізація через batching підтверджень).
-```
