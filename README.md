@@ -12,8 +12,7 @@
 
 ```mermaid
 graph LR
-    Client[Web / Mobile Client] --> API[Backend API]
-    Client --> API
+    Client --> API[Backend API]
     
     API --> MS[Message Service]
     
