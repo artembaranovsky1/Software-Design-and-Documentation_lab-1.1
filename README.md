@@ -80,6 +80,7 @@ stateDiagram-v2
 
 ---
 
+```markdown
 # ADR-001: Client-Driven Message Status Tracking
 
 ## Status
@@ -99,3 +100,4 @@ Implement a lifecycle (Sent -> Delivered -> Read) managed via asynchronous Clien
 + High accuracy of delivery and read receipts  
 + Robust handling of offline/online transitions  
 - Increased API traffic due to frequent ACK signals
+```
