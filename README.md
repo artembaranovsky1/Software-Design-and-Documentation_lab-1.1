@@ -1,7 +1,8 @@
 📨 Software Design and Documentation | Lab 1.1
 
 > **Topic:** Message System Architecture  
-> **Variant:** #2 — Message Status Tracking (Lifecycle & ACKs)  
+> **Variant:** #2 — Message Status Tracking (Lifecycle & ACKs)
+
 Focus: state machine and lifecycle
 
 Additional requirements:
