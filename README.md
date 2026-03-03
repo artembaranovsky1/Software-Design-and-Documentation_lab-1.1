@@ -3,13 +3,16 @@
 
 ```mermaid
 graph LR
-    Client --> API
+    Client[Web / Mobile Client] -- "1. Send Message / 3. Send ACK/Read" --> API[Backend API]
     API --> MS[Message Service]
     MS --> DB[(Messages DB)]
     MS --> Queue[Message Queue]
     Queue --> DS[Delivery Service]
     DS --> WS[WebSocket / Push Service]
-    WS <--> Client
+    WS -- "2. Push Notification" --> Client
+    
+    %% Зворотний зв'язок для статусів
+    MS -. "Update Status" .-> DB
 ```
 
 ```mermaid
