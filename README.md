@@ -20,7 +20,6 @@ graph LR
 
 ```mermaid
 sequenceDiagram
-    participant UA as User A (Sender)
     participant C as Client A
     participant API as Backend API
     participant MS as Message Service
