@@ -27,7 +27,7 @@ sequenceDiagram
     participant DS as Delivery Service
     participant CB as Client B (Recipient)
 
-    UA->>C: Write message
+
     C->>API: POST /send (status: pending)
     API->>MS: processMessage()
     MS->>Q: enqueue delivery task
