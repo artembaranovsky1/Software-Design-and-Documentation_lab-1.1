@@ -80,6 +80,8 @@ stateDiagram-v2
 
 ---
 
+**📚 Part 4 — ADR (Architecture Decision Record)**
+
 ```markdown
 # ADR-001: Client-Driven Message Status Tracking
 
