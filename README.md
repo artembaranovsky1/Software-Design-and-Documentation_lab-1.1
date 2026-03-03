@@ -2,7 +2,12 @@
 
 > **Topic:** Message System Architecture  
 > **Variant:** #2 — Message Status Tracking (Lifecycle & ACKs)  
-> **Institution:** National Aviation University
+Focus: state machine and lifecycle
+
+Additional requirements:
+
+Message statuses: sent, delivered, read
+Client acknowledgements
 
 ---
 
