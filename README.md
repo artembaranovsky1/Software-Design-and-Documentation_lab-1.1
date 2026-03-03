@@ -3,7 +3,7 @@
 
 ```mermaid
 graph TD
-    Client[Web / Mobile Client] --> API[Backend API]
+    Client --> API
     API --> MS[Message Service]
     MS --> DB[(Messages DB)]
     MS --> Queue[Message Queue]
