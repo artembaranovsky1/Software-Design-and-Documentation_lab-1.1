@@ -3,6 +3,7 @@
 > **Topic:** Message System Architecture  
 > **Variant:** #2 — Message Status Tracking (Lifecycle & ACKs)
 
+
 Focus: state machine and lifecycle
 
 Additional requirements:
