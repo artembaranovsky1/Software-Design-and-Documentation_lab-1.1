@@ -43,28 +43,16 @@ sequenceDiagram
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Sent: Client sends message
+    [*] --> Sent
+    Sent --> Delivered : Client Receive ACK
+    Delivered --> Read : User Open ACK
     
-    Sent --> Delivered: Delivery ACK received\n(System confirm)
-    
-    Delivered --> Read: Read ACK received\n(User opened)
+    %% Обробка помилок (опціонально для повноти схеми)
+    Sent --> DeliveryFailed : Connection Lost
+    DeliveryFailed --> Retried : System Retry
+    Retried --> Sent
     
     Read --> [*]
-
-    note right of Sent
-        Initial state: 
-        Persisted in DB
-    end note
-
-    note right of Delivered
-        Message reached 
-        recipient device
-    end note
-
-    note right of Read
-        Final state: 
-        User viewed content
-    end note
 ```
 
 
