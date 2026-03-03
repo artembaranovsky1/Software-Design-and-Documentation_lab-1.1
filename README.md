@@ -12,18 +12,23 @@
 
 ```mermaid
 graph LR
-    Client --> API[Backend API]
+    Sender[Client A: Sender] -- "1. Send Message" --> API[Backend API]
+    Recipient[Client B: Recipient] -- "4. Send ACK (Delivered/Read)" --> API
     
     API --> MS[Message Service]
     
     MS -- "2. Create Message (Status: Sent)" --> DB[(Messages DB)]
-    MS -. "5. Update Status (Sent -> Delivered -> Read)" .-> DB
+    MS -. "5. Update Status" .-> DB
     
     MS --> Queue[Message Queue]
     Queue --> DS[Delivery Service]
     DS --> WS[WebSocket / Push Service]
     
-    WS -- "3. Push Notification" --> Client
+    WS -- "3. Push Notification" --> Recipient
+    
+    %% Шлях оновлення статусу для відправника
+    MS -- "6. Status Update Notification" --> WS
+    WS -- "7. View Status Change" --> Sender
 ```
 ---
 
