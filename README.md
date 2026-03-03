@@ -2,7 +2,7 @@
 
 
 ```mermaid
-graph TD
+graph LR
     Client --> API
     API --> MS[Message Service]
     MS --> DB[(Messages DB)]
