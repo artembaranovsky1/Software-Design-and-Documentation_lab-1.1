@@ -68,7 +68,7 @@ stateDiagram-v2
     Read --> [*]
 ```
 
-
+```mermaid
 # ADR-001: Client-Driven Message Status Tracking
 
 ## Status
@@ -85,6 +85,10 @@ Implement a lifecycle (Sent -> Delivered -> Read) managed via asynchronous Clien
 - Client polling for status (considered: rejected due to high battery/data usage)
 
 ## Consequences
++ High accuracy of delivery and read receipts  
++ Robust handling of offline/online transitions  
+- Increased API traffic due to frequent ACK signals
 + High accuracy of delivery and read receipts
 + Robust handling of offline/online transitions
 - Increased API traffic due to frequent ACK signals
+```
