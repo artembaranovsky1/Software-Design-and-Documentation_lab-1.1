@@ -1,5 +1,13 @@
-# Software-Design-and-Documentation_lab-1.1|||
+📨 Software Design and Documentation | Lab 1.1
 
+> **Topic:** Message System Architecture  
+> **Variant:** #2 — Message Status Tracking (Lifecycle & ACKs)  
+> **Institution:** National Aviation University
+
+---
+
+**🛠 1. Component Diagram**
+Ця діаграма описує архітектуру системи та взаємодію основних компонентів для забезпечення життєвого циклу повідомлення.
 
 ```mermaid
 graph LR
@@ -17,6 +25,9 @@ graph LR
     
     WS -- "3. Push Notification" --> Client
 ```
+
+**🔄 2. Sequence Diagram**
+Детальна логіка передачі даних та обробки підтверджень (Acknowledgements) між відправником та отримувачем.
 
 ```mermaid
 sequenceDiagram
@@ -40,6 +51,8 @@ sequenceDiagram
     MS-->>C: WebSocket: Notify "Delivered"
 ```
 
+**🚦 3. State Diagram**
+Опис станів об'єкта Message та логіки переходів між ними.
 
 ```mermaid
 stateDiagram-v2
@@ -56,23 +69,22 @@ stateDiagram-v2
 ```
 
 
-Status
+# ADR-001: Client-Driven Message Status Tracking
+
+## Status
 Accepted
 
-Context
-Нам потрібно гарантувати точне відображення статусів повідомлень. Сервер може знати, що він відправив повідомлення, але тільки клієнт може підтвердити, що воно було отримане (delivered) або прочитане (read).
+## Context
+Standard server-side tracking cannot guarantee that a message was actually received or seen on the user's device.
 
-Decision
-Who updates status: Клієнтська програма ініціює оновлення, надсилаючи короткі повідомлення-підтвердження (ACK) через API або WebSocket.
+## Decision
+Implement a lifecycle (Sent -> Delivered -> Read) managed via asynchronous Client Acknowledgements (ACKs) sent back to the API.
 
-Missing Acknowledgements: Якщо сервер не отримує delivered протягом певного часу, повідомлення вважається "в черзі". При наступному підключенні клієнта (B), система проводить синхронізацію і повторно надсилає відсутні ACKs.
+## Alternatives
+- Server-side optimistic tracking (rejected: unreliable)
+- Client polling for status (considered: rejected due to high battery/data usage)
 
-Alternatives
-Server-only tracking: Сервер ставить статус delivered одразу після відправки в сокет. (Відхилено: не гарантує, що додаток на телефоні реально отримав дані).
-
-Polling: Клієнт постійно запитує, чи є нові статуси. (Відхилено: надто велике навантаження на батарею та мережу).
-
-Consequences
-+ Висока точність статусів (як у Telegram/WhatsApp).
-
-- Збільшення кількості дрібних запитів до API (необхідна оптимізація через batching підтверджень).
+## Consequences
++ High accuracy of delivery and read receipts
++ Robust handling of offline/online transitions
+- Increased API traffic due to frequent ACK signals
