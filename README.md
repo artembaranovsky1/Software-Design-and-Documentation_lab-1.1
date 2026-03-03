@@ -11,7 +11,7 @@
 Ця діаграма описує архітектуру системи та взаємодію основних компонентів для забезпечення життєвого циклу повідомлення.
 
 ```mermaid
-graph DR
+graph LR
     Client[Web / Mobile Client] -- "1. Send Message" --> API[Backend API]
     Client -- "4. Send ACK (Delivered/Read)" --> API
     
