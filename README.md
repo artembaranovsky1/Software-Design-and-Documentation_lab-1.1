@@ -4,13 +4,6 @@
 > **Variant:** #2 — Message Status Tracking (Lifecycle & ACKs)
 
 
-Focus: state machine and lifecycle
-
-Additional requirements:
-
-Message statuses: sent, delivered, read
-Client acknowledgements
-
 ---
 
 **🛠 1. Component Diagram**
