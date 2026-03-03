@@ -12,8 +12,8 @@
 
 ```mermaid
 graph LR
-    Client[Web / Mobile Client] -- "1. Send Message" --> API[Backend API]
-    Client -- "4. Send ACK (Delivered/Read)" --> API
+    Client[Web / Mobile Client] --> API[Backend API]
+    Client --> API
     
     API --> MS[Message Service]
     
