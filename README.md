@@ -53,9 +53,9 @@ sequenceDiagram
     
     Q->>DS: trigger delivery
     DS->>CB: push message via WebSocket
-    CB-->>DS: ACK (delivery)
-    DS->>MS: updateStatus(delivered)
-    MS-->>C: WebSocket: Notify "Delivered"
+    CB-->>DS: ACK (delivery / read)
+    DS->>MS: updateStatus(delivered / read)
+    MS-->>C: WebSocket: Notify "Delivered / Read"
 ```
 
 ---
