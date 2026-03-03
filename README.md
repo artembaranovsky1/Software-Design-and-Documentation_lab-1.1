@@ -25,6 +25,7 @@ graph LR
     
     WS -- "3. Push Notification" --> Client
 ```
+---
 
 **🔄 2. Sequence Diagram**
 Детальна логіка передачі даних та обробки підтверджень (Acknowledgements) між відправником та отримувачем.
@@ -51,6 +52,8 @@ sequenceDiagram
     MS-->>C: WebSocket: Notify "Delivered"
 ```
 
+---
+
 **🚦 3. State Diagram**
 Опис станів об'єкта Message та логіки переходів між ними.
 
@@ -68,7 +71,8 @@ stateDiagram-v2
     Read --> [*]
 ```
 
-```mermaid
+---
+
 # ADR-001: Client-Driven Message Status Tracking
 
 ## Status
@@ -88,7 +92,3 @@ Implement a lifecycle (Sent -> Delivered -> Read) managed via asynchronous Clien
 + High accuracy of delivery and read receipts  
 + Robust handling of offline/online transitions  
 - Increased API traffic due to frequent ACK signals
-+ High accuracy of delivery and read receipts
-+ Robust handling of offline/online transitions
-- Increased API traffic due to frequent ACK signals
-```
