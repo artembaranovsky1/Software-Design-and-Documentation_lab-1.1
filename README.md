@@ -3,24 +3,19 @@
 
 ```mermaid
 graph LR
-    Client[Web / Mobile Client] -- "1. Send (status: sent) / 4. Send ACK (delivered/read)" --> API[Backend API]
+    Client[Web / Mobile Client] -- "1. Send Message" --> API[Backend API]
+    Client -- "4. Send ACK (Delivered/Read)" --> API
+    
     API --> MS[Message Service]
     
-    subgraph Logic [Business Logic & State]
-        MS --> SM[State Machine]
-        SM -- "Update Status" --> DB[(Database: Message State)]
-    end
-
+    MS -- "2. Create Message (Status: Sent)" --> DB[(Messages DB)]
+    MS -. "5. Update Status (Sent -> Delivered -> Read)" .-> DB
+    
     MS --> Queue[Message Queue]
     Queue --> DS[Delivery Service]
     DS --> WS[WebSocket / Push Service]
     
-    WS -- "2. Push Message" --> Client
-    WS -. "3. Technical Delivery ACK" .-> MS
-
-    %% Styling
-    style SM fill:#f9f,stroke:#333,stroke-width:2px
-    style DB fill:#dae8fc,stroke:#6c8ebf
+    WS -- "3. Push Notification" --> Client
 ```
 
 ```mermaid
